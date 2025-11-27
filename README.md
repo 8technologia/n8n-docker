@@ -14,6 +14,7 @@ Bước 4: Trong cấu hình của Cloudflare Tunnel. Mục Service chọn Type 
 ## Chạy docker compose
 
 Để chạy thì cd đến thư mục nơi có file docker-compose.yml của n8n
+
 Ví dụ: cd /www/wwwroot/n8n.tamcongnghe.com
 
 Nhập lệnh sau để chạy: docker compose up -d
