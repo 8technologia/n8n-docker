@@ -1,0 +1,60 @@
+services:
+  # Cài PostgreSQL
+  postgres:
+    image: postgres:15-alpine
+    container_name: n8n_postgres
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_DB=${DB_POSTGRES_DATABASE}
+      - POSTGRES_USER=${DB_POSTGRES_USER}
+      - POSTGRES_PASSWORD=${DB_POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks:
+      - n8n-network
+
+  # Cài N8N
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: n8n
+    env_file:
+      - .env
+    environment:
+      # Cấu hình PostgreSQL
+      - DB_TYPE=postgresdb
+      - DB_POSTGRESDB_HOST=postgres
+      - DB_POSTGRESDB_PORT=5432
+      - DB_POSTGRESDB_DATABASE=${DB_POSTGRES_DATABASE}
+      - DB_POSTGRESDB_USER=${DB_POSTGRES_USER}
+      - DB_POSTGRESDB_PASSWORD=${DB_POSTGRES_PASSWORD}
+      # Cấu hình cho webhook
+      - N8N_PROTOCOL=${N8N_PROTOCOL}
+      - N8N_HOST=${N8N_HOST}
+      - WEBHOOK_URL=${BASE_URL}
+      # Bật MCP trong AI Agents
+      - N8N_COMMUNITY_PACKAGES_ALLOW_TOOL_USAGE=true
+      # Option
+      - GENERIC_TIMEZONE=${GENERIC_TIMEZONE}
+      - N8N_RUNNERS_ENABLED=true
+      - N8N_GIT_NODE_DISABLE_BARE_REPOS=true
+      - N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true
+
+    ports:
+      - "${N8N_PORT}:5678"  # Mở port ra host
+    volumes:
+      - n8n_data:/home/node/.n8n
+    depends_on:
+      - postgres
+    restart: unless-stopped
+    networks:
+      - n8n-network
+
+networks:
+  n8n-network:
+    name: n8n-network
+    driver: bridge
+volumes:
+  n8n_data:
+  postgres_data:
